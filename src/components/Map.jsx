@@ -3,6 +3,16 @@ import leaflet from "leaflet";
 import axios from "axios";
 import "leaflet/dist/leaflet.css";
 
+// Fix for default marker icons
+delete leaflet.Icon.Default.prototype._getIconUrl;
+
+leaflet.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
 export default function Map() {
   const mapRef = useRef();
   const [towers, setTowers] = useState([]);
@@ -16,7 +26,7 @@ export default function Map() {
       console.error("Error fetching towers:", error);
     }
   };
-  console.log(towers);
+
   // Add a new tower to JSON Server
   const addTower = async (latitude, longitude) => {
     const name = prompt("Enter tower name:");
@@ -57,23 +67,59 @@ export default function Map() {
       addTower(latitude, longitude); // Add tower to JSON Server
     });
   }, []);
+  // useEffect(() => {
+  //   fetchTowers();
+  // }, [addTower]);
 
   useEffect(() => {
-    // Clear existing markers
+    // Clear existing layers (markers and polylines)
     mapRef.current.eachLayer((layer) => {
-      if (layer instanceof leaflet.Marker) {
+      if (
+        layer instanceof leaflet.Marker ||
+        layer instanceof leaflet.Polyline
+      ) {
         mapRef.current.removeLayer(layer);
       }
     });
 
     // Add markers for each tower
-    towers.forEach(({ name, details, latitude, longitude }) => {
-      leaflet
+    towers.forEach(({ id, name, details, latitude, longitude }) => {
+      const marker = leaflet
         .marker([latitude, longitude])
         .addTo(mapRef.current)
-        .bindPopup(`<b>${name}</b><br>${details}`);
+        .bindPopup(
+          `<b>${name}</b><br>${details}<br><button onclick="window.deleteTower('${id}')">Delete</button>`
+        );
+
+      // Add a custom property to the marker to store its ID
+      marker.towerId = id;
     });
+
+    // Add polylines to connect all towers
+    if (towers.length > 1) {
+      const latLngs = towers.map(({ latitude, longitude }) => [
+        latitude,
+        longitude,
+      ]);
+      leaflet.polyline(latLngs, { color: "blue" }).addTo(mapRef.current);
+    }
   }, [towers]);
 
-  return <div id="map"></div>;
+  // Expose the deleteTower function to the global scope
+  useEffect(() => {
+    // Delete a tower from JSON Server
+    const deleteTower = async (id) => {
+      try {
+        await axios.delete(`http://localhost:3001/towers/${id}`);
+        setTowers((prevTowers) =>
+          prevTowers.filter((tower) => tower.id !== id)
+        );
+      } catch (error) {
+        console.error("Error deleting tower:", error);
+      }
+    };
+    window.deleteTower = deleteTower;
+  }, []);
+
+  return <div id="map" style={{ height: "100vh", width: "100%" }}></div>;
 }

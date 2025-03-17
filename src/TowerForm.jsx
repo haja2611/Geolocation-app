@@ -25,8 +25,8 @@ const TowerForm = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    //e.preventDefault();
     if (!name || !details || !latitude || !longitude) {
       alert("Please fill all fields and get your location.");
       return;
