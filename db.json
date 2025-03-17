@@ -1,18 +1,3 @@
 {
-  "towers": [
-    {
-      "id": "0b70",
-      "name": "1",
-      "details": "1",
-      "latitude": 13.069313015481077,
-      "longitude": 80.22778956866276
-    },
-    {
-      "id": "3e82",
-      "name": "2",
-      "details": "2",
-      "latitude": 13.0482176,
-      "longitude": 80.2127872
-    }
-  ]
+  "towers": []
 }

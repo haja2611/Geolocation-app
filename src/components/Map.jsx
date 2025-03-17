@@ -121,5 +121,5 @@ export default function Map() {
     window.deleteTower = deleteTower;
   }, []);
 
-  return <div id="map" style={{ height: "100vh", width: "100%" }}></div>;
+  return <div id="map"></div>;
 }
