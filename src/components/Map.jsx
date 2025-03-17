@@ -1,28 +1,44 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import leaflet from "leaflet";
-import useLocalStorage from "../hooks/useLocalStorage";
-import useGeolocation from "../hooks/useGeolocation";
+import axios from "axios";
+import "leaflet/dist/leaflet.css";
 
 export default function Map() {
   const mapRef = useRef();
-  const userMarkerRef = useRef();
+  const [towers, setTowers] = useState([]);
 
-  const [userPosition, setUserPosition] = useLocalStorage("USER_MARKER", {
-    latitude: 0,
-    longitude: 0,
-  });
-
-  const [nearbyMarkers, setNearbyMarkers] = useLocalStorage(
-    "NEARBY_MARKERS",
-    []
-  );
-
-  const location = useGeolocation();
+  // Fetch towers from JSON Server
+  const fetchTowers = async () => {
+    try {
+      const response = await axios.get("http://localhost:3001/towers");
+      setTowers(response.data);
+    } catch (error) {
+      console.error("Error fetching towers:", error);
+    }
+  };
+  console.log(towers);
+  // Add a new tower to JSON Server
+  const addTower = async (latitude, longitude) => {
+    const name = prompt("Enter tower name:");
+    const details = prompt("Enter tower details:");
+    if (name && details) {
+      try {
+        const response = await axios.post("http://localhost:3001/towers", {
+          name,
+          details,
+          latitude,
+          longitude,
+        });
+        setTowers((prevTowers) => [...prevTowers, response.data]);
+      } catch (error) {
+        console.error("Error adding tower:", error);
+      }
+    }
+  };
 
   useEffect(() => {
-    mapRef.current = leaflet
-      .map("map")
-      .setView([userPosition.latitude, userPosition.longitude], 13);
+    // Initialize the map
+    mapRef.current = leaflet.map("map").setView([13.0835046, 80.2170575], 13);
 
     leaflet
       .tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -32,49 +48,32 @@ export default function Map() {
       })
       .addTo(mapRef.current);
 
-    nearbyMarkers.forEach(({ latitude, longitude }) => {
-      leaflet
-        .marker([latitude, longitude])
-        .addTo(mapRef.current)
-        .bindPopup(
-          `lat: ${latitude.toFixed(2)}, long: ${longitude.toFixed(2)}`
-        );
-    });
+    // Fetch existing towers
+    fetchTowers();
 
-    mapRef.current.addEventListener("click", (e) => {
+    // Add click event to the map
+    mapRef.current.on("click", (e) => {
       const { lat: latitude, lng: longitude } = e.latlng;
-      leaflet
-        .marker([latitude, longitude])
-        .addTo(mapRef.current)
-        .bindPopup(
-          `lat: ${latitude.toFixed(2)}, long: ${longitude.toFixed(2)}`
-        );
-
-      setNearbyMarkers((prevMarkers) => [
-        ...prevMarkers,
-        { latitude, longitude },
-      ]);
+      addTower(latitude, longitude); // Add tower to JSON Server
     });
   }, []);
 
   useEffect(() => {
-    setUserPosition({ ...userPosition });
+    // Clear existing markers
+    mapRef.current.eachLayer((layer) => {
+      if (layer instanceof leaflet.Marker) {
+        mapRef.current.removeLayer(layer);
+      }
+    });
 
-    if (userMarkerRef.current) {
-      mapRef.current.removeLayer(userMarkerRef.current);
-    }
+    // Add markers for each tower
+    towers.forEach(({ name, details, latitude, longitude }) => {
+      leaflet
+        .marker([latitude, longitude])
+        .addTo(mapRef.current)
+        .bindPopup(`<b>${name}</b><br>${details}`);
+    });
+  }, [towers]);
 
-    userMarkerRef.current = leaflet
-      .marker([location.latitude, location.longitude])
-      .addTo(mapRef.current)
-      .bindPopup("User");
-
-    const el = userMarkerRef.current.getElement();
-    if (el) {
-      el.style.filter = "hue-rotate(120deg)";
-    }
-
-    mapRef.current.setView([location.latitude, location.longitude]);
-  }, [location, userPosition.latitude, userPosition.longitude]);
-  return <div id="map" ref={mapRef}></div>;
+  return <div id="map"></div>;
 }

@@ -1,0 +1,46 @@
+{
+  "towers": [
+    {
+      "id": "d98e",
+      "name": "hi",
+      "details": "nw23",
+      "latitude": 13.0835046,
+      "longitude": 80.2170575
+    },
+    {
+      "id": "210b",
+      "name": "hassd",
+      "details": "sdsds",
+      "latitude": 14.0482176,
+      "longitude": 80.2127872
+    },
+    {
+      "id": "6253",
+      "name": "ssdsssd",
+      "details": "sdsd",
+      "latitude": 15.0482176,
+      "longitude": 80.2127872
+    },
+    {
+      "id": "4d50",
+      "name": "anna tower",
+      "details": "chennai located",
+      "latitude": 13.082410108750938,
+      "longitude": 80.21933742226793
+    },
+    {
+      "id": "8ec6",
+      "name": "hello tower",
+      "details": "karaikudi",
+      "latitude": 13.0835035,
+      "longitude": 80.21705
+    },
+    {
+      "id": "20ba",
+      "name": "ground",
+      "details": "groud tower",
+      "latitude": 13.081471599685077,
+      "longitude": 80.22040601724247
+    }
+  ]
+}
