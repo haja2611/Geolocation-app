@@ -1,3 +1,25 @@
 {
-  "towers": []
+  "towers": [
+    {
+      "id": "e168",
+      "name": "tower 2",
+      "details": "aminji",
+      "latitude": 13.070990742808569,
+      "longitude": 80.22153547481678
+    },
+    {
+      "id": "2e85",
+      "name": "senoy",
+      "details": "nagar",
+      "latitude": 13.080125042975844,
+      "longitude": 80.22663511731602
+    },
+    {
+      "id": "3fac",
+      "name": "unknown",
+      "details": "unknown",
+      "latitude": 12.63015788768149,
+      "longitude": 80.05673203411867
+    }
+  ]
 }
